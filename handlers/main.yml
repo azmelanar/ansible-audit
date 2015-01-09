@@ -1,0 +1,5 @@
+---
+# handlers file for audit
+
+- name: restart auditd
+  service: name={{ audit_service }} state=restarted

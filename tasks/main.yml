@@ -1,0 +1,33 @@
+---
+# tasks file for audit
+
+- name: include os-specific variables
+  include_vars: "{{ ansible_os_family }}.yml"
+  tags: [audit]
+
+- name: install package for debian system
+  apt: name={{ item }} state=present
+  with_items: audit_packages
+  when: ansible_os_family=='Debian'
+  tags: [audit]
+
+- name: install package for rhel system
+  yum: name={{ item }} state=present
+  with_items: audit_packages
+  when: ansible_os_family=='RedHat'
+  tags: [audit]
+
+- name: set auditd config file
+  template:
+    src: auditd.conf.j2
+    dest: /etc/audit/auditd.conf
+    owner: root
+    group: root
+    mode: 0640
+  notify:
+    - restart auditd
+  tags: [audit]
+
+- name: make sure that service is running and enabled
+  service: name={{ audit_service }} state=started enabled=yes
+  tags: [audit]
